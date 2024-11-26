@@ -98,3 +98,21 @@ class TestSmartRoom(unittest.TestCase):
         sut.manage_window()
         mock_servo.assert_called_once_with(12)
         self.assertTrue(sut.window_open)
+
+    @patch.object(Adafruit_BMP280_I2C, "temperature", new_callable=PropertyMock)
+    @patch.object(SmartRoom, "change_servo_angle")
+    def test_manage_window_close_window_lower_bound(self, mock_servo: Mock, mock_temperature_sensor: Mock):
+        mock_temperature_sensor.side_effect = [20.1, 18]
+        sut = SmartRoom()
+        sut.manage_window()
+        mock_servo.assert_called_once_with(2)
+        self.assertFalse(sut.window_open)
+
+    @patch.object(Adafruit_BMP280_I2C, "temperature", new_callable=PropertyMock)
+    @patch.object(SmartRoom, "change_servo_angle")
+    def test_manage_window_close_window_upper_bound(self, mock_servo: Mock, mock_temperature_sensor: Mock):
+        mock_temperature_sensor.side_effect = [30, 27.9]
+        sut = SmartRoom()
+        sut.manage_window()
+        mock_servo.assert_called_once_with(2)
+        self.assertFalse(sut.window_open)
