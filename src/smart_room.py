@@ -47,8 +47,7 @@ class SmartRoom:
         self.fan_on = False
 
     def check_room_occupancy(self) -> bool:
-        # To be implemented
-        pass
+        return GPIO.input(self.INFRARED_PIN)
 
     def check_enough_light(self) -> bool:
         # To be implemented
@@ -66,7 +65,6 @@ class SmartRoom:
         # To be implemented
         pass
 
-
     def change_servo_angle(self, duty_cycle):
         """
         Changes the servo motor's angle by passing it the corresponding PWM duty cycle
@@ -77,6 +75,6 @@ class SmartRoom:
             time.sleep(1)
         self.servo.ChangeDutyCycle(0) # Set duty cycle equal to 0%
 
-
 class SmartRoomError(Exception):
     pass
+
