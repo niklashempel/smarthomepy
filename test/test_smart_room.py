@@ -132,3 +132,31 @@ class TestSmartRoom(unittest.TestCase):
 
         mock_servo.assert_not_called()
         self.assertFalse(sut.window_open)
+
+    @patch.object(SenseairS8, "co2")
+    @patch.object(GPIO, "output")
+    def test_monitor_air_quality_turn_on(self, mock_fan: Mock, mock_sensair: Mock):
+        mock_sensair.return_value = 800
+        sut = SmartRoom()
+        sut.monitor_air_quality()
+        mock_fan.assert_called_once_with(sut.FAN_PIN, True)
+        self.assertTrue(sut.fan_on)
+
+    @patch.object(SenseairS8, "co2")
+    @patch.object(GPIO, "output")
+    def test_monitor_air_quality_turn_off(self, mock_fan: Mock, mock_sensair: Mock):
+        mock_sensair.return_value = 499
+        sut = SmartRoom()
+        sut.monitor_air_quality()
+        mock_fan.assert_called_once_with(sut.FAN_PIN, False)
+        self.assertFalse(sut.fan_on)
+
+    @patch.object(SenseairS8, "co2")
+    @patch.object(GPIO, "output")
+    def test_monitor_air_quality_do_nothing(self, mock_fan: Mock, mock_sensair: Mock):
+        mock_sensair.side_effect = [799, 500]
+        sut = SmartRoom()
+        sut.monitor_air_quality()
+        sut.monitor_air_quality()
+        mock_fan.assert_not_called()
+        self.assertFalse(sut.fan_on)
