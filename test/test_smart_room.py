@@ -1,7 +1,7 @@
 import unittest
 import mock.GPIO as GPIO
 from unittest.mock import patch, PropertyMock
-from unittest.mock import Mock
+from unittest.mock import Mock, call
 
 from mock.adafruit_bmp280 import Adafruit_BMP280_I2C
 from src.smart_room import SmartRoom
@@ -50,35 +50,15 @@ class TestSmartRoom(unittest.TestCase):
     @patch.object(GPIO, "output")
     def test_manage_light_level_turn_off_if_no_people(self, mock_led: Mock, mock_check_enough_light: Mock,
                                         mock_check_room_occupancy: Mock):
-        mock_check_room_occupancy.return_value = False
-        mock_check_enough_light.return_value = False
+        mock_check_room_occupancy.side_effect = [False, True, False]
+        mock_check_enough_light.return_value = [False, True, True]
         sut = SmartRoom()
         sut.manage_light_level()
-        mock_led.assert_called_once_with(sut.LED_PIN, False)
-        self.assertFalse(sut.light_on)
+        sut.manage_light_level()
+        sut.manage_light_level()
 
-    @patch.object(SmartRoom, "check_room_occupancy")
-    @patch.object(SmartRoom, "check_enough_light")
-    @patch.object(GPIO, "output")
-    def test_manage_light_level_turn_off_if_enough_light(self, mock_led: Mock, mock_check_enough_light: Mock,
-                                                      mock_check_room_occupancy: Mock):
-        mock_check_room_occupancy.return_value = True
-        mock_check_enough_light.return_value = True
-        sut = SmartRoom()
-        sut.manage_light_level()
-        mock_led.assert_called_once_with(sut.LED_PIN, False)
-        self.assertFalse(sut.light_on)
-
-    @patch.object(SmartRoom, "check_room_occupancy")
-    @patch.object(SmartRoom, "check_enough_light")
-    @patch.object(GPIO, "output")
-    def test_manage_light_level_turn_off_if_enough_light_and_no_people(self, mock_led: Mock, mock_check_enough_light: Mock,
-                                                      mock_check_room_occupancy: Mock):
-        mock_check_room_occupancy.return_value = False
-        mock_check_enough_light.return_value = True
-        sut = SmartRoom()
-        sut.manage_light_level()
-        mock_led.assert_called_once_with(sut.LED_PIN, False)
+        calls = [call(sut.LED_PIN, False),call(sut.LED_PIN, False),call(sut.LED_PIN, False)]
+        mock_led.assert_has_calls(calls)
         self.assertFalse(sut.light_on)
 
     @patch.object(Adafruit_BMP280_I2C, "temperature", new_callable=PropertyMock)
