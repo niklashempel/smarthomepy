@@ -63,6 +63,10 @@ class SmartRoom:
     def manage_window(self) -> None:
         indor = self.bmp280_indor.temperature
         outdoor = self.bmp280_outdoor.temperature
+
+        if not (18 <= indor <= 30) or not (18 <= outdoor <= 30):
+            return
+
         if 18 <= indor < outdoor - 2 <= 30:
             self.change_servo_angle(12)
             self.window_open = True
