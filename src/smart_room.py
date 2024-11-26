@@ -61,8 +61,9 @@ class SmartRoom:
             self.light_on = False
 
     def manage_window(self) -> None:
-        # To be implemented
-        pass
+        if 18 <= self.bmp280_indor.temperature < self.bmp280_outdoor.temperature - 2 <= 30:
+            self.change_servo_angle(12)
+            self.window_open = True
 
     def monitor_air_quality(self) -> None:
         # To be implemented
