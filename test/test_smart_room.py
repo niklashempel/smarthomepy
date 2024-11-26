@@ -44,3 +44,39 @@ class TestSmartRoom(unittest.TestCase):
         sut.manage_light_level()
         mock_led.assert_called_once_with(sut.LED_PIN, True)
         self.assertTrue(sut.light_on)
+
+    @patch.object(SmartRoom, "check_room_occupancy")
+    @patch.object(SmartRoom, "check_enough_light")
+    @patch.object(GPIO, "output")
+    def test_manage_light_level_turn_off_if_no_people(self, mock_led: Mock, mock_check_enough_light: Mock,
+                                        mock_check_room_occupancy: Mock):
+        mock_check_room_occupancy.return_value = False
+        mock_check_enough_light.return_value = False
+        sut = SmartRoom()
+        sut.manage_light_level()
+        mock_led.assert_called_once_with(sut.LED_PIN, False)
+        self.assertFalse(sut.light_on)
+
+    @patch.object(SmartRoom, "check_room_occupancy")
+    @patch.object(SmartRoom, "check_enough_light")
+    @patch.object(GPIO, "output")
+    def test_manage_light_level_turn_off_if_enough_light(self, mock_led: Mock, mock_check_enough_light: Mock,
+                                                      mock_check_room_occupancy: Mock):
+        mock_check_room_occupancy.return_value = True
+        mock_check_enough_light.return_value = True
+        sut = SmartRoom()
+        sut.manage_light_level()
+        mock_led.assert_called_once_with(sut.LED_PIN, False)
+        self.assertFalse(sut.light_on)
+
+    @patch.object(SmartRoom, "check_room_occupancy")
+    @patch.object(SmartRoom, "check_enough_light")
+    @patch.object(GPIO, "output")
+    def test_manage_light_level_turn_off_if_enough_light_and_no_people(self, mock_led: Mock, mock_check_enough_light: Mock,
+                                                      mock_check_room_occupancy: Mock):
+        mock_check_room_occupancy.return_value = False
+        mock_check_enough_light.return_value = True
+        sut = SmartRoom()
+        sut.manage_light_level()
+        mock_led.assert_called_once_with(sut.LED_PIN, False)
+        self.assertFalse(sut.light_on)
